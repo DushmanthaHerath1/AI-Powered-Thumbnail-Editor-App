@@ -4,7 +4,6 @@ import { urlToBase64 } from "../utils/imageUtils";
 
 const MODEL_NAME = 'gemini-2.5-flash-image';
 
-// Store the full prompt in a constant to keep the logic clean
 const THUMBNAIL_SYSTEM_PROMPT = `
 You are a World-Class YouTube Thumbnail Artist. Your goal is to generate or edit images optimized for maximum visual impact and click-through rates.
 
@@ -21,24 +20,29 @@ Transform the user's request into a detailed visual description. Do not just rep
 
 export class GeminiService {
   async processThumbnail(userPrompt: string, currentImageUrl?: string | null) {
-    // Initialize AI instance inside the method to ensure fresh context/key if needed
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Correctly initialize GoogleGenAI with named parameter apiKey from process.env.API_KEY
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const parts: any[] = [{ text: `User Task: ${userPrompt}` }];
 
     if (currentImageUrl) {
-      const base64Data = await urlToBase64(currentImageUrl);
-      parts.push({
-        inlineData: {
-          mimeType: "image/png",
-          data: base64Data
-        }
-      });
+      try {
+        const base64Data = await urlToBase64(currentImageUrl);
+        parts.push({
+          inlineData: {
+            mimeType: "image/png",
+            data: base64Data
+          }
+        });
+      } catch (e) {
+        console.warn("Failed to process existing image, proceeding with text-only prompt.", e);
+      }
     }
 
+    // Call generateContent with the model and contents structure (using parts directly)
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: [{ role: 'user', parts }],
+      contents: { parts },
       config: {
         systemInstruction: THUMBNAIL_SYSTEM_PROMPT,
         imageConfig: {
@@ -49,23 +53,22 @@ export class GeminiService {
     });
 
     let generatedImageUrl = '';
-    let responseText = '';
+    
+    // Direct property access for text response as per guidelines
+    const responseText = response.text || "I've polished your thumbnail! Ready for the front page.";
 
-    // Safely iterate through candidate parts to extract image data and text
+    // Iterate through candidates and parts to find the generated image (nano banana models)
     const candidate = response.candidates?.[0];
     if (candidate?.content?.parts) {
-      for (const part of candidate.content.parts) {
-        if (part.inlineData) {
-          generatedImageUrl = `data:image/png;base64,${part.inlineData.data}`;
-        } else if (part.text) {
-          responseText = part.text;
-        }
+      const imagePart = candidate.content.parts.find(p => p.inlineData);
+      if (imagePart?.inlineData) {
+        generatedImageUrl = `data:image/png;base64,${imagePart.inlineData.data}`;
       }
     }
 
     return {
       imageUrl: generatedImageUrl,
-      text: responseText || "I've polished your thumbnail! Ready for the front page."
+      text: responseText
     };
   }
 }

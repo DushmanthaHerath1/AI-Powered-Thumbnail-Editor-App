@@ -1,21 +1,35 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ClickGenius - AI Thumbnail Editor</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563EB',
+          }
+        }
+      }
+    }
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary-blue: #2563EB;
       --bg-soft: #F8F9FB;
     }
+    html.dark {
+      background-color: #020617;
+    }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--bg-soft);
-      color: #1E293B;
+      transition: background-color 0.3s ease, color 0.3s ease;
       margin: 0;
       overflow: hidden;
       touch-action: manipulation;
@@ -39,6 +53,9 @@
       background: #E2E8F0;
       border-radius: 10px;
     }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
     @keyframes slideUp {
       from { transform: translateY(100%); }
       to { transform: translateY(0); }
@@ -46,7 +63,12 @@
     .animate-slide-up {
       animation: slideUp 0.3s ease-out forwards;
     }
-    /* Touch target helpers */
+    /* Smooth transitions for theme switching */
+    * {
+      transition-property: background-color, border-color, color, fill, stroke;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 200ms;
+    }
     .touch-target {
       min-height: 44px;
       min-width: 44px;
@@ -58,12 +80,13 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@0.471.0"
   }
 }
 </script>
 </head>
-<body>
+<body class="bg-[#F8F9FB] dark:bg-slate-950 text-slate-900 dark:text-slate-100">
   <div id="root"></div>
 </body>
 </html>
