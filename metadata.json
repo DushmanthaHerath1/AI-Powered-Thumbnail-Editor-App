@@ -1,0 +1,7 @@
+{
+  "name": "ClickGenius: YouTube Thumbnail AI Editor",
+  "description": "A professional-grade AI-powered YouTube thumbnail editor that uses chat-based instructions to generate and edit high-CTR 16:9 visuals.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
